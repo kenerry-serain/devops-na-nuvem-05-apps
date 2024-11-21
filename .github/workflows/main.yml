@@ -46,7 +46,7 @@ jobs:
         repository: 'kenerry-serain/devops-na-nuvem-05-gitops'
         token: ${{ secrets.PAT }}
         
-    - name: Checkout and Commig GitOps
+    - name: Checkout and Commit GitOps
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
@@ -55,4 +55,47 @@ jobs:
         kustomize edit set image $REGISTRY/$BACKEND_REPOSITORY=$REGISTRY/$BACKEND_REPOSITORY:$IMAGE_TAG
         git add ./kustomization.yml
         git commit -m "[GH Actions] Changed Backend Image to $REGISTRY/$BACKEND_REPOSITORY:$IMAGE_TAG"
+        git push
+
+  frontEndJob:
+    name: Frontend Deployment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{vars.AWS_REGION}}
+        role-to-assume: ${{vars.AWS_DEPLOYMENT_ROLE}}
+
+    - id: login-ecr
+      name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and Push (ECR)
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+          docker build \
+            -f ./frontend/youtube-live-app/Dockerfile \
+            -t $REGISTRY/$FRONTEND_REPOSITORY:$IMAGE_TAG \
+            ./frontend/youtube-live-app
+          docker push $REGISTRY/$FRONTEND_REPOSITORY:$IMAGE_TAG
+
+    - uses: actions/checkout@v4
+      with:
+        repository: 'kenerry-serain/devops-na-nuvem-05-gitops'
+        token: ${{ secrets.PAT }}
+        
+    - name: Checkout and Commit GitOps
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        kustomize edit set image $REGISTRY/$FRONTEND_REPOSITORY=$REGISTRY/$FRONTEND_REPOSITORY:$IMAGE_TAG
+        git add ./kustomization.yml
+        git commit -m "[GH Actions] Changed Frontend Image to $REGISTRY/$FRONTEND_REPOSITORY:$IMAGE_TAG"
         git push
