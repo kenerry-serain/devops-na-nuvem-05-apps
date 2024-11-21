@@ -23,7 +23,7 @@ public class WeatherForecastController : ControllerBase
     {
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
-            Deployment = "v10.0",
+            Deployment = "v1.1",
             Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
             TemperatureC = Random.Shared.Next(-20, 55),
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
