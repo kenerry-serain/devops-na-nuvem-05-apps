@@ -10,7 +10,7 @@ permissions:
 
 env:
     BACKEND_REPOSITORY: devops-na-nuvem-week/production/backend
-    FRONTEND_REPOSITORY: devops-na-nuvem-week/production/backend
+    FRONTEND_REPOSITORY: devops-na-nuvem-week/production/frontend
     IMAGE_TAG: ${{ github.sha }}
 
 jobs:
